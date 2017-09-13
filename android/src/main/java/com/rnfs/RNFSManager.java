@@ -30,6 +30,8 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
+import android.net.Uri;
+import android.webkit.MimeTypeMap;
 
 public class RNFSManager extends ReactContextBaseJavaModule {
 
@@ -40,6 +42,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
   private static final String RNFSTemporaryDirectoryPath = "RNFSTemporaryDirectoryPath";
   private static final String RNFSCachesDirectoryPath = "RNFSCachesDirectoryPath";
   private static final String RNFSDocumentDirectory = "RNFSDocumentDirectory";
+  private static final String RNFSDownloadsDirectoryPath = "RNFSDownloadsDirectoryPath";
 
   private static final String RNFSFileTypeRegular = "RNFSFileTypeRegular";
   private static final String RNFSFileTypeDirectory = "RNFSFileTypeDirectory";
@@ -497,6 +500,13 @@ public class RNFSManager extends ReactContextBaseJavaModule {
       params.onTaskCompleted = new DownloadParams.OnTaskCompleted() {
         public void onTaskCompleted(DownloadResult res) {
           if (res.exception == null) {
+            Uri selectedUri = Uri.fromFile(file);
+            String fileExtension= MimeTypeMap.getFileExtensionFromUrl(selectedUri.toString());
+            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
+
+            DownloadManager downloadManager =  (DownloadManager) getCurrentActivity().getSystemService(getCurrentActivity().DOWNLOAD_SERVICE);
+            downloadManager.addCompletedDownload(file.getName(), file.getName(), true, mimeType, file.getAbsolutePath(), file.length(), true);
+
             WritableMap infoMap = Arguments.createMap();
 
             infoMap.putInt("jobId", jobId);
@@ -614,6 +624,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
     constants.put(RNFSCachesDirectoryPath, this.getReactApplicationContext().getCacheDir().getAbsolutePath());
     constants.put(RNFSFileTypeRegular, 0);
     constants.put(RNFSFileTypeDirectory, 1);
+    constants.put(RNFSDownloadsDirectoryPath, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
 
     File externalStorageDirectory = Environment.getExternalStorageDirectory();
     if (externalStorageDirectory != null) {
