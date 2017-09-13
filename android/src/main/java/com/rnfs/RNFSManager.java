@@ -1,5 +1,6 @@
 package com.rnfs;
 
+import android.app.DownloadManager;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.os.Environment;
